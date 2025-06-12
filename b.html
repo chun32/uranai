@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>保存したテキストの表示</title>
+</head>
+<body>
+  <h2>保存されたテキスト</h2>
+  <button id="listBtn">ファイル一覧取得</button>
+  <select id="fileList"></select>
+  <button id="loadBtn">表示</button>
+  <pre id="display"></pre>
+  <script>
+    const API_BASE = 'http://153.134.48.1:1376';
+
+    // ファイル一覧を取得して表示する関数
+    function loadFileList() {
+      fetch(`${API_BASE}/list`)
+        .then(res => res.json())
+        .then(data => {
+          const fileList = document.getElementById('fileList');
+          fileList.innerHTML = '';
+          data.files.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f;
+            opt.textContent = f;
+            fileList.appendChild(opt);
+          });
+        });
+    }
+
+    // ページ読み込み時に自動でファイル一覧を取得
+    window.onload = loadFileList;
+
+    // ボタンでも再取得できる
+    document.getElementById('listBtn').onclick = loadFileList;
+
+    document.getElementById('loadBtn').onclick = function() {
+      const filename = document.getElementById('fileList').value;
+      fetch(`${API_BASE}/load?filename=${encodeURIComponent(filename)}`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('display').textContent = data.text || 'まだ保存されていません';
+        });
+    };
+  </script>
+</body>
+</html>
